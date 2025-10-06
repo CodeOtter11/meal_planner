@@ -40,7 +40,7 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Text(
-                "Welcome to your AI Meal Planner!\nPlan your meals, track your nutrition, and stay healthy.",
+                "Welcome to your AI Meal Planner!\nPlan your meals, track your nutrition, and stay healthy",
                 style: TextStyle(
                   color: Color(0xFF4A148C), // dark purple text
                   fontSize: 20,
