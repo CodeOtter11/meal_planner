@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,10 +22,13 @@ class _LoginPageState extends State<LoginPage> {
     if (emailController.text == savedEmail &&
         passwordController.text == savedPassword) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const HomePage()));
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email or password')));
+        const SnackBar(content: Text('Invalid email or password')),
+      );
     }
   }
 
@@ -85,11 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                     TextField(
                       controller: passwordController,
                       obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: "Password",
-                        suffixIcon:
-                        Icon(Icons.visibility_off, color: Colors.white54),
-                      ),
+                      decoration: const InputDecoration(hintText: "Password"),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
@@ -101,8 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child:
-                      const Text("Login", style: TextStyle(fontSize: 16)),
+                      child: const Text("Login", style: TextStyle(fontSize: 16)),
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -115,8 +113,10 @@ class _LoginPageState extends State<LoginPage> {
                             MaterialPageRoute(
                                 builder: (_) => const SignupPage()),
                           ),
-                          child: const Text("Sign Up",
-                              style: TextStyle(color: Color(0xFF8E44AD))),
+                          child: const Text(
+                            "Sign Up",
+                            style: TextStyle(color: Color(0xFF8E44AD)),
+                          ),
                         ),
                       ],
                     ),

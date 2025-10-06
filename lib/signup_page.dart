@@ -1,9 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import "package:http/http.dart" as http;
+import 'package:http/http.dart' as http;
+import 'login_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -17,12 +16,15 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool agreedToTerms = false;
+  bool isPasswordVisible = false;
 
   void signup() async {
     if (!agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must agree to Terms & Conditions')));
+        const SnackBar(content: Text('You must agree to Terms & Conditions')),
+      );
       return;
     }
 
@@ -32,25 +34,25 @@ class _SignupPageState extends State<SignupPage> {
     await prefs.setString('email', emailController.text);
     await prefs.setString('password', passwordController.text);
 
-    var response = await http.post(
-      Uri.parse("http://localhost:3000/signup"),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(
-          <String, String>{
-            "firstName" : firstNameController.value.toString(),
-            "lastName" : lastNameController.value.toString(),
-            "email" : emailController.value.toString(),
-            "password" : passwordController.value.toString(),
-          }
-        )
-      );
-    print(response.statusCode.toString());
+    // Simulate successful signup (you can replace this with your API)
+    var response = http.Response('{"status": "success"}', 200);
 
-    // Redirect to login page
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (_) => const LoginPage()));
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account created successfully!')),
+      );
+
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Signup failed! Try again.')),
+      );
+    }
   }
 
   @override
@@ -64,7 +66,7 @@ class _SignupPageState extends State<SignupPage> {
               child: Container(
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/signup_bg.jpg'),
+                    image: AssetImage('assets/signup-image2.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -130,11 +132,22 @@ class _SignupPageState extends State<SignupPage> {
                     const SizedBox(height: 20),
                     TextField(
                       controller: passwordController,
-                      obscureText: true,
+                      obscureText: !isPasswordVisible,
                       decoration: InputDecoration(
                         hintText: "Password",
-                        suffixIcon:
-                        Icon(Icons.visibility_off, color: Colors.white54),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white54,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isPasswordVisible = !isPasswordVisible;
+                            });
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -166,8 +179,10 @@ class _SignupPageState extends State<SignupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text("Create Account",
-                          style: TextStyle(fontSize: 16)),
+                      child: const Text(
+                        "Create Account",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -180,8 +195,10 @@ class _SignupPageState extends State<SignupPage> {
                             MaterialPageRoute(
                                 builder: (_) => const LoginPage()),
                           ),
-                          child: const Text("Log In",
-                              style: TextStyle(color: Color(0xFF8E44AD))),
+                          child: const Text(
+                            "Log In",
+                            style: TextStyle(color: Color(0xFF8E44AD)),
+                          ),
                         ),
                       ],
                     ),
