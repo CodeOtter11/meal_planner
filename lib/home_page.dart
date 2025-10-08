@@ -2,406 +2,239 @@ import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'generate_meal_plan_page.dart';
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomeContent(),
+    const Center(child: Text('🍱 Meal Planner', style: TextStyle(fontSize: 22))),
+    const Center(child: Text('🤖 Chat Bot', style: TextStyle(fontSize: 22))),
+    const Center(child: Text('📜 History', style: TextStyle(fontSize: 22))),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() => _selectedIndex = index);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          "AI Meal Planner",
-          style: TextStyle(color: Color(0xFF4A148C)),
-        ),
-        backgroundColor: const Color(0xFFF3E5F5),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF8E44AD)), // For drawer icon
-      ),
-      drawer: _buildDrawer(context),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(constraints.maxWidth < 600 ? 15.0 : 30.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with Generate Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Today's Meal Plan",
-                      style: TextStyle(
-                        fontSize: constraints.maxWidth < 600 ? 22 : 26,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF4A148C),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const GenerateMealPlanPage(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8E44AD),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        "Generate Meal Plan",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: constraints.maxWidth < 600 ? 14 : 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Meal Cards
-                _buildMealCard(
-                  title: 'Breakfast: Overnight Oats with Berries',
-                  description: 'A nutritious start with mixed berries and chia seeds.',
-                  calories: '350 kcal',
-                  logged: true,
-                ),
-                _buildMealCard(
-                  title: 'Lunch: Grilled Chicken Salad',
-                  description: 'Fresh greens, grilled chicken breast, and vinaigrette.',
-                  calories: '420 kcal',
-                  logged: true,
-                ),
-                _buildMealCard(
-                  title: 'Dinner: Salmon with Roasted Vegetables',
-                  description: 'Baked salmon fillet with asparagus and sweet potato.',
-                  calories: '580 kcal',
-                  logged: false,
-                ),
-                _buildMealCard(
-                  title: 'Snacks: Apple Slices with Almond Butter',
-                  description: 'Quick and healthy energy boost.',
-                  calories: '180 kcal',
-                  logged: false,
-                ),
-
-                const SizedBox(height: 40),
-
-                // Nutrition Summary
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8F5FA),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Nutrition Summary",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4A148C),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildNutritionBar("Calories", 1530, 2000, Colors.orange),
-                      _buildNutritionBar("Protein", 85, 120, Colors.purple),
-                      _buildNutritionBar("Carbs", 150, 250, Colors.teal),
-                      _buildNutritionBar("Fats", 60, 70, Colors.pink),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Quick Recommendations
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8F5FA),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Quick Recommendations",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4A148C),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildRecommendation("Winter Vegetable Soup", "Warm & Comforting"),
-                      _buildRecommendation("Berry Smoothie", "Refreshing & Light"),
-                      _buildRecommendation("Hearty Lentil Stew", "High in Fiber"),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Motivation Quote + Notifications
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Quote
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F5FA),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Text(
-                          '"The journey to a healthier you begins with one simple step: a conscious choice."',
-                          style: TextStyle(
-                            color: Color(0xFF4A148C),
-                            fontStyle: FontStyle.italic,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // Notifications
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F5FA),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              "Notifications & Reminders",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF4A148C),
-                                fontSize: 18,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            ListTile(
-                              leading: Icon(Icons.notifications_none),
-                              title: Text("Reminder: Log your dinner meal"),
-                              subtitle: Text("5:30 PM"),
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.emoji_events_outlined),
-                              title: Text("Achievement! Hit protein goal"),
-                              subtitle: Text("8:00 AM"),
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.alarm),
-                              title: Text("Snack time reminder"),
-                              subtitle: Text("3:00 PM"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // ---------------- Drawer ----------------
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: Container(
-        color: const Color(0xFFF3E5F5),
+      // Left drawer (menu)
+      drawer: Drawer(
+        backgroundColor: Colors.white,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF8E44AD)),
-              child: Text(
-                "AI Meal Planner",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.deepPurple, Colors.purpleAccent],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
+              child: Row(
+                children: const [
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, color: Colors.purple, size: 40),
+                  ),
+                  SizedBox(width: 15),
+                  Text(
+                    'Hey, Kanisha!',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
             ),
-            _buildDrawerItem(Icons.home, "Home", () {
-              Navigator.pop(context); // Close drawer
-            }),
-            _buildDrawerItem(Icons.calendar_month, "Meal Plan", () {
-              Navigator.pop(context);
-            }),
-            _buildDrawerItem(Icons.book, "Recipes", () {
-              Navigator.pop(context);
-            }),
-            _buildDrawerItem(Icons.history, "Meal History", () {
-              Navigator.pop(context);
-            }),
-            _buildDrawerItem(Icons.settings, "Settings", () {
-              Navigator.pop(context);
-            }),
+            ListTile(
+              leading: const Icon(Icons.shopping_bag, color: Colors.purple),
+              title: const Text('Grocery Preview'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite, color: Colors.purple),
+              title: const Text('Favourites'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.purple),
+              title: const Text('Settings'),
+              onTap: () {},
+            ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.logout, color: Colors.black54),
-              title: const Text("Logout", style: TextStyle(color: Colors.black54)),
-              onTap: () {
-                Navigator.pop(context);
-                // Add logout logic here
-              },
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout'),
+              onTap: () {},
             ),
+          ],
+        ),
+      ),
+
+      appBar: AppBar(
+        title: const Text(
+          'My Planner',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.purple),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.purple),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Profile Clicked')),
+              );
+            },
+          ),
+        ],
+      ),
+
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFEDE7F6), Color(0xFFF3E5F5)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: _pages[_selectedIndex],
+      ),
+
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10),
+          ],
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.purple,
+          unselectedItemColor: Colors.grey,
+          currentIndex: _selectedIndex,
+          type: BottomNavigationBarType.fixed,
+          onTap: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: 'Meal'),
+            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+            BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           ],
         ),
       ),
     );
   }
+}
 
-  // ---------------- Drawer Item ----------------
-  Widget _buildDrawerItem(IconData icon, String label, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF4A148C)),
-      title: Text(label, style: const TextStyle(color: Color(0xFF4A148C))),
-      onTap: onTap,
-    );
-  }
+// 🩷 Home Page Content Section
+class HomeContent extends StatelessWidget {
+  const HomeContent({super.key});
 
-  // ---------------- Meal Card ----------------
-  Widget _buildMealCard({
-    required String title,
-    required String description,
-    required String calories,
-    required bool logged,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F5FA),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: const Offset(0, 3)),
-        ],
-      ),
-      child: Row(
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          const SizedBox(width: 85), // Placeholder for image space
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4A148C))),
-                const SizedBox(height: 4),
-                Text(description, style: const TextStyle(color: Colors.black87)),
-                const SizedBox(height: 4),
-                Text(calories, style: const TextStyle(color: Colors.grey)),
+          const Text(
+            'Welcome Back 👋',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.purple),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Let’s plan your day smartly!',
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+          const SizedBox(height: 20),
+
+          // Fancy cards
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildCard(Icons.fastfood, 'Meal Plan', Colors.purpleAccent),
+              _buildCard(Icons.chat_bubble, 'Chat Bot', Colors.deepPurpleAccent),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildCard(Icons.history, 'History', Colors.purple),
+              _buildCard(Icons.local_grocery_store, 'Grocery', Colors.deepPurple),
+            ],
+          ),
+          const SizedBox(height: 30),
+
+          // Tips section
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))
               ],
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: logged ? Colors.green : const Color(0xFF8E44AD),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(logged ? "Logged" : "Log Meal"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------------- Nutrition Bar ----------------
-  Widget _buildNutritionBar(String label, int current, int goal, Color color) {
-    double progress = current / goal;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("$label: $current / $goal", style: const TextStyle(color: Colors.black87)),
-          const SizedBox(height: 5),
-          LinearProgressIndicator(
-            value: progress,
-            color: color,
-            backgroundColor: Colors.grey.shade300,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---------------- Recommendation ----------------
-  Widget _buildRecommendation(String title, String subtitle) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          const SizedBox(width: 60), // Placeholder for image space
-          const SizedBox(width: 10),
-          Expanded(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(
+              children: const [
+                Text('🌸 Daily Tip',
+                    style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF4A148C))),
-                Text(subtitle, style: const TextStyle(color: Colors.black54)),
+                        color: Colors.purple,
+                        fontSize: 18)),
+                SizedBox(height: 8),
+                Text('Drink plenty of water and stay consistent with your plan! 💪',
+                    style: TextStyle(fontSize: 15, color: Colors.black87)),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Reusable card widget
+  static Widget _buildCard(IconData icon, String title, Color color) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color, width: 1),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 35),
+            const SizedBox(height: 10),
+            Text(title,
+                style: TextStyle(
+                    color: color, fontWeight: FontWeight.w600, fontSize: 16)),
+          ],
+        ),
       ),
     );
   }
