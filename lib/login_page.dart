@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Welcome Back",
+                      "yaha jo bhi text tha dal denna",
                       style:
                       TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
