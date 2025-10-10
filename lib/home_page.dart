@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'login_page.dart';
-import 'generate_meal_plan_page.dart';
+import 'meal_plan_generator_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -27,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Left drawer (menu)
       drawer: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFEDE7F6), Color(0xFFF3E5F5)],
+            colors: [Color(0xFFF3E5F5), Color(0xFFFFFFFF)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -147,12 +147,72 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// 🩷 Home Page Content Section
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
 
   @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  late final PageController _pageController;
+  double _page = 0.0;
+  int _hoveredIndex = -1;
+
+  final List<Map<String, dynamic>> _tiles = [
+    {
+      'icon': Icons.fastfood,
+      'title': 'Meal Plan',
+      'gradient': [Color(0xFF6B46C1), Color(0xFFB794F4), Colors.white],
+      'text': 'Plan your meals for today — quick & nutritious.',
+    },
+    {
+      'icon': Icons.chat_bubble,
+      'title': 'Chat Bot',
+      'gradient': [Color(0xFF7E57C2), Color(0xFFD1C4E9), Colors.white],
+      'text': 'Chat with your AI assistant for meal tips.',
+
+    },
+    {
+      'icon': Icons.history,
+      'title': 'History',
+      'gradient': [Color(0xFF9575CD), Color(0xFFEDE7F6), Colors.white],
+      'text': 'Check your previous plans and insights.',
+    },
+    {
+      'icon': Icons.local_grocery_store,
+      'title': 'Grocery',
+      'gradient': [Color(0xFF8E24AA), Color(0xFFE1BEE7), Colors.white],
+      'text': 'Organize your grocery list efficiently.',
+    },
+
+  ];
+
+
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 0, viewportFraction: 0.9);
+    _pageController.addListener(() {
+      setState(() {
+        _page = _pageController.page ?? 0.0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final double cardAreaHeight = MediaQuery.of(context).size.height * 0.5;
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(16),
@@ -168,25 +228,7 @@ class HomeContent extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Fancy cards
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCard(Icons.fastfood, 'Meal Plan', Colors.purpleAccent),
-              _buildCard(Icons.chat_bubble, 'Chat Bot', Colors.deepPurpleAccent),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCard(Icons.history, 'History', Colors.purple),
-              _buildCard(Icons.local_grocery_store, 'Grocery', Colors.deepPurple),
-            ],
-          ),
-          const SizedBox(height: 30),
-
-          // Tips section
+          // Daily Tip Section
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -196,9 +238,9 @@ class HomeContent extends StatelessWidget {
               ],
             ),
             padding: const EdgeInsets.all(20),
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text('🌸 Daily Tip',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -210,31 +252,96 @@ class HomeContent extends StatelessWidget {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
 
-  // Reusable card widget
-  static Widget _buildCard(IconData icon, String title, Color color) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color, width: 1),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 35),
-            const SizedBox(height: 10),
-            Text(title,
-                style: TextStyle(
-                    color: color, fontWeight: FontWeight.w600, fontSize: 16)),
-          ],
-        ),
+          const SizedBox(height: 30),
+
+          // Redesigned Floating Gradient Cards
+          SizedBox(
+            height: cardAreaHeight,
+            child: PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _tiles.length,
+              itemBuilder: (context, index) {
+                final tile = _tiles[index];
+                final double delta = index - _page;
+                final double translateY = (delta * 30).clamp(-40.0, 40.0);
+                final double scale = (1 - delta.abs() * 0.05).clamp(0.9, 1.0) *
+                    (_hoveredIndex == index ? 1.05 : 1.0);
+
+                return MouseRegion(
+                  onEnter: (_) => setState(() => _hoveredIndex = index),
+                  onExit: (_) => setState(() => _hoveredIndex = -1),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    transform: Matrix4.identity()
+                      ..translate(0.0, translateY)
+                      ..scale(scale),
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: List<Color>.from(tile['gradient']),
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(25),
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${tile['title']} Clicked')),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(26),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Transform.translate(
+                              offset: Offset(0, -delta * 6),
+                              child: Icon(tile['icon'], color: Colors.purple.shade900, size: 48),
+                            ),
+                            const SizedBox(height: 14),
+                            Transform.translate(
+                              offset: Offset(0, -delta * 3),
+                              child: Text(
+                                tile['title'],
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Opacity(
+                              opacity: (1 - delta.abs() * 0.6).clamp(0.0, 1.0),
+                              child: Text(
+                                tile['text'],
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.black54, fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
