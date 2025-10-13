@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,20 +15,59 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void login() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? savedEmail = prefs.getString('email');
-    String? savedPassword = prefs.getString('password');
+  // For web: http://127.0.0.1:3000/api/auth/login
+  // For Android emulator: http://10.0.2.2:3000/api/auth/login
+  // For physical device: http://<your-machine-ip>:3000/api/auth/login (e.g., http://192.168.1.x:3000)
+  static const String baseUrl = 'http://127.0.0.1:3000/api/auth/login';
 
-    if (emailController.text == savedEmail &&
-        passwordController.text == savedPassword) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } else {
+  void login() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid email or password')),
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    final Map<String, String> loginData = {
+      'email': emailController.text.trim(),
+      'password': passwordController.text.trim(),
+    };
+    print('[${DateTime.now().toIso8601String()}] Sending login request: $loginData');
+
+    try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(loginData),
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw Exception('Request timed out after 10 seconds');
+      });
+
+      print('[${DateTime.now().toIso8601String()}] Response Status: ${response.statusCode}');
+      print('[${DateTime.now().toIso8601String()}] Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login successful! Welcome ${data['user']['firstName'] ?? 'User'}')),
+        );
+
+        emailController.clear();
+        passwordController.clear();
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      print('[${DateTime.now().toIso8601String()}] Error during login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e, URI: $baseUrl. Ensure backend is running.')),
       );
     }
   }
@@ -51,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                   color: Colors.black.withOpacity(0.4),
                   child: const Center(
                     child: Text(
-                      "Fuel Your Body,\nPlan Your Meals",
+                      'Fuel Your Body,\nPlan Your Meals',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 28,
@@ -72,23 +112,27 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Welcome Back!",
-                      style:
-                      TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      'Welcome Back',
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    const Text("Log in to continue your healthy journey",
-                        style: TextStyle(color: Colors.white54)),
+                    const Text(
+                      'Log in to continue your healthy journey',
+                      style: TextStyle(color: Colors.white54),
+                    ),
                     const SizedBox(height: 40),
                     TextField(
                       controller: emailController,
-                      decoration: const InputDecoration(hintText: "Email"),
+                      decoration: const InputDecoration(hintText: 'Email'),
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: passwordController,
                       obscureText: true,
-                      decoration: const InputDecoration(hintText: "Password"),
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                        suffixIcon: Icon(Icons.visibility_off, color: Colors.white54),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
@@ -100,23 +144,20 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text("Login", style: TextStyle(fontSize: 16)),
+                      child: const Text('Login', style: TextStyle(fontSize: 16)),
                     ),
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Don’t have an account? "),
+                        const Text('Don’t have an account? '),
                         GestureDetector(
                           onTap: () => Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                                builder: (_) => const SignupPage()),
+                            MaterialPageRoute(builder: (_) => const SignupPage()),
                           ),
-                          child: const Text(
-                            "Sign Up",
-                            style: TextStyle(color: Color(0xFF8E44AD)),
-                          ),
+                          child: const Text('Sign Up',
+                              style: TextStyle(color: Color(0xFF8E44AD))),
                         ),
                       ],
                     ),
