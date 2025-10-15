@@ -3,7 +3,6 @@ import 'dart:math';
 import 'login_page.dart';
 import 'meal_plan_generator_page.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -171,7 +170,6 @@ class _HomeContentState extends State<HomeContent> {
       'title': 'Chat Bot',
       'gradient': [Color(0xFF7E57C2), Color(0xFFD1C4E9), Colors.white],
       'text': 'Chat with your AI assistant for meal tips.',
-
     },
     {
       'icon': Icons.history,
@@ -185,12 +183,7 @@ class _HomeContentState extends State<HomeContent> {
       'gradient': [Color(0xFF8E24AA), Color(0xFFE1BEE7), Colors.white],
       'text': 'Organize your grocery list efficiently.',
     },
-
   ];
-
-
-
-
 
   @override
   void initState() {
@@ -255,7 +248,7 @@ class _HomeContentState extends State<HomeContent> {
 
           const SizedBox(height: 30),
 
-          // Redesigned Floating Gradient Cards
+          // Floating Cards Section
           SizedBox(
             height: cardAreaHeight,
             child: PageView.builder(
@@ -298,9 +291,18 @@ class _HomeContentState extends State<HomeContent> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(25),
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${tile['title']} Clicked')),
-                        );
+                        // ✅ Navigation for Meal Plan card
+                        if (tile['title'] == 'Meal Plan') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MealPlanGeneratorPage()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('${tile['title']} Clicked')),
+                          );
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(26),
@@ -309,7 +311,8 @@ class _HomeContentState extends State<HomeContent> {
                           children: [
                             Transform.translate(
                               offset: Offset(0, -delta * 6),
-                              child: Icon(tile['icon'], color: Colors.purple.shade900, size: 48),
+                              child: Icon(tile['icon'],
+                                  color: Colors.purple.shade900, size: 48),
                             ),
                             const SizedBox(height: 14),
                             Transform.translate(
@@ -329,7 +332,8 @@ class _HomeContentState extends State<HomeContent> {
                               child: Text(
                                 tile['text'],
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.black54, fontSize: 14),
+                                style: const TextStyle(
+                                    color: Colors.black54, fontSize: 14),
                               ),
                             ),
                           ],
