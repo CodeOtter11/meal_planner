@@ -25,15 +25,22 @@ class _MealPlanGeneratorPageState extends State<MealPlanGeneratorPage> {
 
   final List<String> genders = ['Male', 'Female', 'Other'];
   final List<String> goals = ['Lose Weight', 'Maintain Weight', 'Gain Muscle'];
-  final List<String> dietaryPreferences = ['Vegetarian', 'Vegan', 'Non-Vegetarian', 'Keto', 'Paleo'];
+  final List<String> dietaryPreferences = [
+    'Vegetarian',
+    'Vegan',
+    'Non-Vegetarian',
+    'Keto',
+    'Paleo'
+  ];
 
-  // Spoonacular API key (replace with your own)
+  // Spoonacular API key
   final String apiKey = 'e65793b8783e499fb8c80e6902f70c46';
 
   Future<void> generateMealPlan() async {
     if (_formKey.currentState!.validate()) {
       final String diet = dietaryPreference ?? 'balanced';
-      final String intolerances = allergiesController.text.isNotEmpty ? allergiesController.text : 'peanuts';
+      final String intolerances =
+      allergiesController.text.isNotEmpty ? allergiesController.text : 'peanuts';
       final String targetCalories = _calculateTargetCalories().toString();
 
       final url = Uri.parse(
@@ -47,21 +54,22 @@ class _MealPlanGeneratorPageState extends State<MealPlanGeneratorPage> {
           final meals = data['meals'];
           final nutrients = data['nutrients'];
           final mealPlan = StringBuffer();
-          mealPlan.write('Daily Indian Meal Plan:\n');
+          mealPlan.write('🍛 **Your Indian Meal Plan** 🍛\n\n');
           for (var meal in meals) {
-            mealPlan.write('- ${meal['title']} (Ready in ${meal['readyInMinutes']} mins, Servings: ${meal['servings']})\n');
+            mealPlan.write(
+                '• ${meal['title']} (⏱ ${meal['readyInMinutes']} mins, 🍽 Servings: ${meal['servings']})\n');
           }
-          mealPlan.write('Nutrients: Calories: ${nutrients['calories'].toStringAsFixed(2)}, '
-              'Protein: ${nutrients['protein'].toStringAsFixed(2)} g, '
-              'Fat: ${nutrients['fat'].toStringAsFixed(2)} g, '
-              'Carbs: ${nutrients['carbohydrates'].toStringAsFixed(2)} g');
+          mealPlan.write(
+              '\n**Nutrients Summary:**\nCalories: ${nutrients['calories'].toStringAsFixed(2)} kcal\nProtein: ${nutrients['protein'].toStringAsFixed(2)} g\nFat: ${nutrients['fat'].toStringAsFixed(2)} g\nCarbs: ${nutrients['carbohydrates'].toStringAsFixed(2)} g');
 
           setState(() {
             mealPlanResult = mealPlan.toString();
+            showForm = false; // close popup
           });
         } else {
           setState(() {
-            mealPlanResult = 'Failed to generate meal plan. Status: ${response.statusCode}. Please check your API key or try again later.';
+            mealPlanResult =
+            'Failed to generate meal plan. Please check your API key or try again later.';
           });
         }
       } catch (e) {
@@ -79,16 +87,36 @@ class _MealPlanGeneratorPageState extends State<MealPlanGeneratorPage> {
     final String genderValue = gender ?? 'Male';
     final String goalValue = goal ?? 'Maintain Weight';
 
-    // Simplified BMR calculation (Mifflin-St Jeor Equation)
     double bmr = genderValue == 'Male'
         ? 10 * weight + 6.25 * height - 5 * age + 5
         : 10 * weight + 6.25 * height - 5 * age - 161;
 
-    // Adjust for goal
-    if (goalValue == 'Lose Weight') bmr *= 0.85; // 15% deficit
-    if (goalValue == 'Gain Muscle') bmr *= 1.15; // 15% surplus
+    if (goalValue == 'Lose Weight') bmr *= 0.85;
+    if (goalValue == 'Gain Muscle') bmr *= 1.15;
 
     return bmr.round();
+  }
+
+  // Helper for consistent text field design
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: Colors.white,
+      labelStyle: const TextStyle(color: Color(0xFF6C3483), fontWeight: FontWeight.w500),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFFB57EDC), width: 1.5),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFFB57EDC), width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFF8E44AD), width: 2),
+      ),
+    );
   }
 
   @override
@@ -96,185 +124,184 @@ class _MealPlanGeneratorPageState extends State<MealPlanGeneratorPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3E5F5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4A2C5A),
-        title: const Text('AI Meal Planner'),
+        backgroundColor: const Color(0xFF8E44AD),
+        title: const Text('AI Meal Planner', style: TextStyle(fontWeight: FontWeight.w600)),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const Text(
-                'Welcome to your AI Meal Planner!',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF4A2C5A)),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Here you can generate a personalized Indian meal plan based on your goals, preferences, and dietary restrictions. 🍛',
-                style: TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4A2C5A),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+      body: Stack(
+        children: [
+          // Main content
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  const Text(
+                    'Customize your preferences and generate a meal plan designed for your lifestyle 🍱',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    showForm = true;
-                  });
-                },
-                child: const Text('Generate Meal Plan', style: TextStyle(fontSize: 16)),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() => showForm = true);
+                    },
+                    icon: const Icon(Icons.auto_awesome, color: Colors.white),
+                    label: const Text('Generate Meal Plan'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8E44AD),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  if (mealPlanResult != null && mealPlanResult!.isNotEmpty)
+                    Card(
+                      elevation: 10,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text(
+                          mealPlanResult!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 20),
-              if (showForm)
-                Center(
-                  child: Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    color: Colors.white,
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      padding: const EdgeInsets.all(20),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Generate Your Meal Plan 🍽️',
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4A2C5A)),
-                            ),
-                            const SizedBox(height: 15),
-                            TextFormField(
-                              controller: ageController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Age',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              validator: (value) => value!.isEmpty ? 'Enter your age' : null,
-                            ),
-                            const SizedBox(height: 10),
-                            DropdownButtonFormField<String>(
-                              value: gender,
-                              decoration: const InputDecoration(
-                                labelText: 'Gender',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              items: genders
-                                  .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => gender = val),
-                              validator: (value) => value == null ? 'Select gender' : null,
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: heightController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Height (cm)',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              validator: (value) => value!.isEmpty ? 'Enter your height' : null,
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: weightController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Weight (kg)',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              validator: (value) => value!.isEmpty ? 'Enter your weight' : null,
-                            ),
-                            const SizedBox(height: 10),
-                            DropdownButtonFormField<String>(
-                              value: goal,
-                              decoration: const InputDecoration(
-                                labelText: 'Goal',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              items: goals
-                                  .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => goal = val),
-                              validator: (value) => value == null ? 'Select goal' : null,
-                            ),
-                            const SizedBox(height: 10),
-                            TextFormField(
-                              controller: allergiesController,
-                              decoration: const InputDecoration(
-                                labelText: 'Allergies',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            DropdownButtonFormField<String>(
-                              value: dietaryPreference,
-                              decoration: const InputDecoration(
-                                labelText: 'Dietary Preference',
-                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              items: dietaryPreferences
-                                  .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                                  .toList(),
-                              onChanged: (val) => setState(() => dietaryPreference = val),
-                            ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4A2C5A),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+
+          // Popup form overlay
+          if (showForm)
+            GestureDetector(
+              onTap: () => setState(() => showForm = false),
+              child: Container(
+                color: Colors.black.withOpacity(0.4),
+                width: double.infinity,
+                height: double.infinity,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: Card(
+                      elevation: 20,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Form(
+                          key: _formKey,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Fill Your Details 🍽️',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF6C3483),
+                                  ),
                                 ),
-                              ),
-                              onPressed: generateMealPlan,
-                              child: const Text('Generate Now'),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: ageController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _inputDecoration('Age'),
+                                  validator: (v) => v!.isEmpty ? 'Enter your age' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
+                                  value: gender,
+                                  decoration: _inputDecoration('Gender'),
+                                  items: genders
+                                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => gender = val),
+                                  validator: (v) => v == null ? 'Select gender' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: heightController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _inputDecoration('Height (cm)'),
+                                  validator: (v) => v!.isEmpty ? 'Enter your height' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: weightController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _inputDecoration('Weight (kg)'),
+                                  validator: (v) => v!.isEmpty ? 'Enter your weight' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
+                                  value: goal,
+                                  decoration: _inputDecoration('Goal'),
+                                  items: goals
+                                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                                      .toList(),
+                                  onChanged: (val) => setState(() => goal = val),
+                                  validator: (v) => v == null ? 'Select goal' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: allergiesController,
+                                  decoration: _inputDecoration('Allergies (if any)'),
+                                ),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
+                                  value: dietaryPreference,
+                                  decoration: _inputDecoration('Dietary Preference'),
+                                  items: dietaryPreferences
+                                      .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                                      .toList(),
+                                  onChanged: (val) =>
+                                      setState(() => dietaryPreference = val),
+                                ),
+                                const SizedBox(height: 20),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: ElevatedButton(
+                                    onPressed: generateMealPlan,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF8E44AD),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 40, vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Generate Now',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              if (mealPlanResult != null && mealPlanResult!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                    elevation: 8,
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        mealPlanResult!,
-                        style: const TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+              ),
+            ),
+        ],
       ),
     );
   }
