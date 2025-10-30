@@ -3,6 +3,7 @@ import 'dart:math';
 import 'login_page.dart';
 import 'meal_plan_generator_page.dart';
 
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -16,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     const HomeContent(),
     const Center(child: Text('🍱 Meal Planner', style: TextStyle(fontSize: 22))),
-    const Center(child: Text('🤖 Chat Bot', style: TextStyle(fontSize: 22))),
+
     const Center(child: Text('📜 History', style: TextStyle(fontSize: 22))),
   ];
 
@@ -49,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(width: 15),
                   Text(
-                    'Hey, Kanisha!',
+                    'Hello',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -196,6 +197,8 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
+
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -291,19 +294,42 @@ class _HomeContentState extends State<HomeContent> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(25),
                       onTap: () {
-                        // ✅ Navigation for Meal Plan card
-                        if (tile['title'] == 'Meal Plan') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MealPlanGeneratorPage()),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${tile['title']} Clicked')),
-                          );
+                        switch (tile['title']) {
+                          case 'Meal Plan':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MealPlanGeneratorPage()),
+                            );
+                            break;
+
+                          // case 'Chat Bot':
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(builder: (context) => ChatBotPage()),
+                          //   );
+                          //   break;
+
+                          // case 'History':
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(builder: (context) => HistoryPage()),
+                          //   );
+                          //   break;
+                          //
+                          // case 'Grocery':
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(builder: (context) => GroceryPage()),
+                          //   );
+                          //   break;
+
+                          default:
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${tile['title']} Clicked')),
+                            );
                         }
                       },
+
                       child: Padding(
                         padding: const EdgeInsets.all(26),
                         child: Column(
