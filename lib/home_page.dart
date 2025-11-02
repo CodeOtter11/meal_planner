@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'login_page.dart';
 import 'meal_plan_generator_page.dart';
-
+import 'progress_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,7 +17,6 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     const HomeContent(),
     const Center(child: Text('🍱 Meal Planner', style: TextStyle(fontSize: 22))),
-
     const Center(child: Text('📜 History', style: TextStyle(fontSize: 22))),
   ];
 
@@ -167,6 +166,12 @@ class _HomeContentState extends State<HomeContent> {
       'text': 'Plan your meals for today — quick & nutritious.',
     },
     {
+      'icon': Icons.bar_chart,
+      'title': 'Progress',
+      'gradient': [Color(0xFF7B1FA2), Color(0xFFCE93D8), Colors.white],
+      'text': 'Track your health & nutrition progress.',
+    },
+    {
       'icon': Icons.chat_bubble,
       'title': 'Chat Bot',
       'gradient': [Color(0xFF7E57C2), Color(0xFFD1C4E9), Colors.white],
@@ -196,8 +201,6 @@ class _HomeContentState extends State<HomeContent> {
       });
     });
   }
-
-
 
   @override
   void dispose() {
@@ -298,30 +301,16 @@ class _HomeContentState extends State<HomeContent> {
                           case 'Meal Plan':
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => MealPlanGeneratorPage()),
+                              MaterialPageRoute(builder: (context) => const MealPlanGeneratorPage()),
                             );
                             break;
 
-                          // case 'Chat Bot':
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(builder: (context) => ChatBotPage()),
-                          //   );
-                          //   break;
-
-                          // case 'History':
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(builder: (context) => HistoryPage()),
-                          //   );
-                          //   break;
-                          //
-                          // case 'Grocery':
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(builder: (context) => GroceryPage()),
-                          //   );
-                          //   break;
+                          case 'Progress':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProgressPage()),
+                            );
+                            break;
 
                           default:
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -329,7 +318,6 @@ class _HomeContentState extends State<HomeContent> {
                             );
                         }
                       },
-
                       child: Padding(
                         padding: const EdgeInsets.all(26),
                         child: Column(
