@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/meal_plan_generator_service.dart';
 
 class MealPlanGeneratorPage extends StatefulWidget {
   const MealPlanGeneratorPage({super.key});
@@ -12,6 +13,34 @@ class _MealPlanGeneratorPageState extends State<MealPlanGeneratorPage> {
   bool showForm = false;
   String? mealPlanResult = '';
   bool isWeekly = false; // Toggle for weekly/daily plan
+  bool _isloading = false;
+  final _mealService = MealPlanGeneratorService(); // ✅ Service instance
+
+// ⬇️ Paste here
+  Future<void> swapMeal(String mealType) async {
+    setState(() => _isloading = true);
+
+    try {
+      final newMeal = await _mealService.generateMealPlan(
+          "Generate a new $mealType option only for ${isWeekly ? 'weekly' : 'daily'} plan with Indian-style meals."
+      );
+
+      setState(() {
+        mealPlanResult = "${mealPlanResult!}\n\n🔄 Updated $mealType:\n$newMeal";
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$mealType swapped successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error swapping meal: $e')),
+      );
+    } finally {
+      setState(() => _isloading = false);
+    }
+  }
+
 
   // Form fields
   final TextEditingController ageController = TextEditingController();
@@ -44,72 +73,49 @@ class _MealPlanGeneratorPageState extends State<MealPlanGeneratorPage> {
   };
   double _userProgress = 0.0;
 
-  // 🔹 Meal Plan Generator
-  void generateMealPlan() {
-    if (_formKey.currentState!.validate()) {
+  // 🔹 Generate plan using Gemini API
+  Future<void> generateMealPlan() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isloading = true;
+    });
+
+    final prompt = """
+Generate a ${isWeekly ? "weekly" : "daily"} meal plan for:
+Age: ${ageController.text},
+Gender: $gender,
+Height: ${heightController.text} cm,
+Weight: ${weightController.text} kg,
+Goal: $goal,
+Allergies: ${allergiesController.text.isEmpty ? "None" : allergiesController.text},
+Dietary Preference: $dietaryPreference.
+
+Provide meals (Breakfast, Lunch, Dinner, Snacks) with Indian-style suggestions if possible.
+Include variety, portion balance, and nutrition-conscious foods.
+""";
+
+    try {
+      final result = await _mealService.generateMealPlan(prompt);
       setState(() {
-        mealPlanResult = '''
-🍳 **Breakfast:**
-• Oats with milk, banana, and almonds  
-• 1 boiled egg or tofu  
-
-🥗 **Lunch:**
-• Brown rice with dal and sautéed vegetables  
-• Grilled paneer/chicken (optional)  
-
-🍝 **Dinner:**
-• Mixed vegetable soup  
-• 2 chapatis or quinoa bowl  
-
-🍎 **Snacks:**
-• Handful of nuts  
-• Green tea or fruit smoothie  
-''';
-
-        groceryList = [
-          'Oats',
-          'Bananas',
-          'Almonds',
-          'Dal',
-          'Vegetables',
-          'Paneer/Chicken',
-          'Chapati Flour',
-          'Green Tea',
-          'Fruits'
-        ];
-
-        estimatedBudget = isWeekly ? 2100 : 300; // ₹300/day or ₹2100/week
+        mealPlanResult = result;
+        estimatedBudget = isWeekly ? 2100 : 300;
         showForm = false;
+        _isloading = false;
 
-        // ✅ Reset progress when a new plan is generated
-        _mealStatus = {
-          "Breakfast": false,
-          "Lunch": false,
-          "Dinner": false,
-        };
+        _mealStatus = {"Breakfast": false, "Lunch": false, "Dinner": false};
         _userProgress = 0.0;
       });
+    } catch (e) {
+      setState(() {
+        _isloading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error generating meal plan: $e")),
+      );
     }
   }
 
-  // 🔁 Swap one meal
-  void swapMeal(String mealType) {
-    setState(() {
-      if (mealType == 'Breakfast') {
-        mealPlanResult = mealPlanResult!.replaceAll(
-            RegExp(r'🍳[\s\S]*?🥗'),
-            '🍳 **Breakfast:**\n• Poha with peanuts and vegetables  \n• Black coffee or milk  \n\n🥗');
-      } else if (mealType == 'Lunch') {
-        mealPlanResult = mealPlanResult!.replaceAll(
-            RegExp(r'🥗[\s\S]*?🍝'),
-            '🥗 **Lunch:**\n• Whole wheat roti with paneer bhurji and salad  \n\n🍝');
-      } else if (mealType == 'Dinner') {
-        mealPlanResult = mealPlanResult!.replaceAll(
-            RegExp(r'🍝[\s\S]*?🍎'),
-            '🍝 **Dinner:**\n• Grilled vegetables with soup  \n• Brown rice optional  \n\n🍎');
-      }
-    });
-  }
 
   // ✅ Mark meal completed
   void _markMealAsCompleted(String meal) {
